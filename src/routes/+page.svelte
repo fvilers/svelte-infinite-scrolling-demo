@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { infiniteScroll } from "$lib/infiniteScroll";
+
   type Item = {
     id: number;
     text: string;
@@ -7,7 +9,6 @@
   // A fake dataSource, normally you'll fetch data from the server
   const dataSource: Item[] = [...Array(100).keys()].map((id) => ({ id, text: "Value " + id }));
   const pageSize = 20;
-  let page = 0;
 
   function loadItems(source: Item[], page: number, pageSize: number): Item[] {
     const start = pageSize * page;
@@ -16,23 +17,16 @@
   }
 
   // Initial load
-  let items = loadItems(dataSource, page, pageSize);
+  let items = loadItems(dataSource, 0, pageSize);
 
-  function handleScroll(e: Event) {
-    const list = e.target;
-
-    if (
-      list instanceof HTMLUListElement &&
-      list.scrollTop + list.clientHeight >= list.scrollHeight
-    ) {
-      items = [...items, ...loadItems(dataSource, ++page, pageSize)];
-    }
+  function handleLoadMore(page: number) {
+    items = [...items, ...loadItems(dataSource, page, pageSize)];
   }
 </script>
 
 <h1>Infinite Scroll Demo</h1>
 
-<ul on:scroll={handleScroll}>
+<ul use:infiniteScroll={handleLoadMore}>
   {#each items as item (item.id)}
     <li>{item.text}</li>
   {/each}
